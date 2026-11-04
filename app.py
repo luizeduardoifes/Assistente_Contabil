@@ -12,7 +12,7 @@ from openpyxl.styles import PatternFill, Font
 load_dotenv() 
 
 st.set_page_config(page_title="Conciliação Multi-Arquivos com OpenAI", layout="wide")
-st.header("📌 Conciliação Avançada e Cruzamento Rigoroso por Título")
+st.header("📌 Conciliação Avançada com Checagem Quádrupla e Explicações Completas")
 
 # --- UPLOAD DE ARQUIVOS NA INTERFACE PRINCIPAL ---
 st.subheader("📁 Envio de Arquivos")
@@ -96,15 +96,15 @@ if arquivo_razao is not None:
         else: st.info("Nenhum arquivo de pendências enviado.")
 
     # Botão para processar
-    if st.button("🚀 Processar Conciliação Rigorosa com IA", key="btn_processar_ia"):
+    if st.button("🚀 Processar Conciliação com Checagem Quádrupla e IA", key="btn_processar_ia"):
         openai_key = os.getenv("OPENAI_API_KEY")
         base_url = os.getenv("BASE_URL")
-        modelo = os.getenv("MODELO_OPENAI", "gpt-4o") 
+        modelo = os.getenv("MODELO_OPENAI") 
         
         if not openai_key:
             st.error("❌ A chave `OPENAI_API_KEY` não foi encontrada no arquivo `.env`.")
         else:
-            with st.spinner("🤖 A IA está cruzando rigorosamente os números dos títulos e valores entre as tabelas. Aguarde..."):
+            with st.spinner("🤖 A IA está executando a checagem quádrupla rigorosa em todas as tabelas e redigindo explicações completas..."):
                 try:
                     client_args = {"api_key": openai_key}
                     if base_url: client_args["base_url"] = base_url
@@ -126,16 +126,17 @@ if arquivo_razao is not None:
                     }
                     
                     prompt_sistema = (
-                        "Você é um auditor contábil sênior extremamente rigoroso. Sua missão é fazer a conciliação entre o Razão, a APB e as Pendências.\n"
-                        "⚠️ **REGRAS DE OURO INEGOTOCIÁVEIS:**\n"
-                        "1. **O Número do Título é a Referência Absoluta:** O campo de Título/Histórico contém códigos de documento (ex: 'IMPL/N00/CBE /CACHOEI/NR:DP/7/0000701/01', onde '0000701' é o número do título). Você DEVE extrair e comparar rigorosamente esse número de referência entre as tabelas. **NÃO** concilie nada se o número do título não coincidir ou não tiver correspondência exata.\n"
-                        "2. **Proibido Somas Aleatórias:** Nunca invente somas ou pareamentos sem embasamento direto no número do título e no valor correspondente.\n"
-                        "3. **Rigidez e Cautela:** Se houver dúvida ou o título/valor não existir nas outras tabelas, classifique estritamente como 'DIVERGENTE' (deixando em branco/sem pintar). Só marque como 'CONCILIADO' se houver certeza absoluta e comprovação cruzada.\n"
-                        "4. **Exigência de Explicação Detalhada:** Na coluna 'explicacao', escreva claramente o motivo e a origem. Exemplos:\n"
-                        "   - No Razão: 'Conciliado no débito X com o crédito Y através do título nº 0000701'.\n"
-                        "   - Cruzamento: 'Conciliado com a Planilha APB através do título nº 0000701 no valor de R$ X'.\n"
-                        "   - Divergente: 'Divergente: Número do título não localizado nas demais planilhas, necessita análise manual'.\n"
-                        "Retorne um JSON estrito com as chaves 'razao_resultados', 'apb_resultados' e 'pendencias_resultados'."
+                        "Você é um auditor contábil sênior extremamente rigoroso e detalhista. Sua missão é realizar a conciliação cruzada entre o Razão, a APB e as Pendências.\n\n"
+                        "🔍 **CHEGAGEM QUÁDRUPLA OBRIGATÓRIA ANTES DE MARCAR QUALQUER LINHA:**\n"
+                        "Antes de classificar qualquer linha como 'CONCILIADO', você deve verificar 4 vezes cruzando:\n"
+                        "1. O número exato do título extraído do histórico (ex: extrair '0000701' de strings como 'IMPL/N00/CBE /CACHOEI/NR:DP/7/0000701/01').\n"
+                        "2. A correspondência exata dos valores numéricos entre as planilhas envolvidas (Razão Débito x Pendências / Razão Crédito x APB Saldo).\n"
+                        "3. A coerência contábil de que o saldo não foi deixado para trás por erro de leitura.\n"
+                        "4. A validação cruzada bidirecional: se a linha X do Razão aponta para o título da APB ou Pendência, a linha correspondente na APB ou Pendência DEVE ser marcada como conciliada conjuntamente, garantindo que ambas fiquem corretas e sincronizadas.\n\n"
+                        "✍️ **EXIGÊNCIA DE EXPLICAÇÕES COMPLETAS:**\n"
+                        "- NUNCA deixe explicações cortadas ou incompletas. Escreva a frase completa detalhando a origem (ex: 'Conciliado com a Planilha APB pois o número de título 0000701 e o valor correspondente bateram perfeitamente com o saldo apresentado').\n"
+                        "- Se não houver correspondência exata após a checagem quádrupla, deixe estritamente como 'DIVERGENTE' (branco) e explique o motivo completo.\n\n"
+                        "Retorne um JSON estrito contendo as chaves 'razao_resultados', 'apb_resultados' e 'pendencias_resultados'."
                     )
                           
                     prompt_usuario = f"""
@@ -144,14 +145,14 @@ if arquivo_razao is not None:
                     - APB -> Valor/Saldo: {col_valor_apb}, Título: {col_titulo_apb}
                     - Pendências -> Valor/Saldo: {col_valor_pend}, Título: {col_titulo_pend}
 
-                    Dados consolidados para análise:
+                    Dados consolidados para análise com checagem quádrupla:
                     {json.dumps(payload, ensure_ascii=False)}
 
                     Retorne um objeto JSON estrito com o formato exato:
                     {{
-                      "razao_resultados": [ {{"_id_raz_": 0, "status": "CONCILIADO" ou "DIVERGENTE", "explicacao": "..."}} ],
-                      "apb_resultados": [ {{"_id_apb_": 0, "status": "CONCILIADO" ou "DIVERGENTE", "explicacao": "..."}} ],
-                      "pendencias_resultados": [ {{"_id_pend_": 0, "status": "CONCILIADO" ou "DIVERGENTE", "explicacao": "..."}} ]
+                      "razao_resultados": [ {{"_id_raz_": 0, "status": "CONCILIADO" ou "DIVERGENTE", "explicacao": "Explicação completa e detalhada..."}} ],
+                      "apb_resultados": [ {{"_id_apb_": 0, "status": "CONCILIADO" ou "DIVERGENTE", "explicacao": "Explicação completa e detalhada..."}} ],
+                      "pendencias_resultados": [ {{"_id_pend_": 0, "status": "CONCILIADO" ou "DIVERGENTE", "explicacao": "Explicação completa e detalhada..."}} ]
                     }}
                     """
                     
@@ -162,7 +163,7 @@ if arquivo_razao is not None:
                             {"role": "user", "content": prompt_usuario}
                         ],
                         response_format={"type": "json_object"}, 
-                        temperature=0.0 # Zero criatividade para garantir total rigor lógico
+                        temperature=0.0
                     )
                     
                     resposta_texto = response.choices[0].message.content
@@ -173,7 +174,7 @@ if arquivo_razao is not None:
                     if not df_r_status.empty:
                         df_razao_final = pd.merge(df_r, df_r_status, on="_id_raz_", how="left").drop(columns=["_id_raz_"])
                         df_razao_final["status"] = df_razao_final["status"].fillna("DIVERGENTE")
-                        df_razao_final["explicacao"] = df_razao_final["explicacao"].fillna("Divergente: Título não validado pela IA.")
+                        df_razao_final["explicacao"] = df_razao_final["explicacao"].fillna("Divergente: Título não validado após checagem quádrupla.")
                     else:
                         df_razao_final = df_razao.copy()
                         df_razao_final["status"] = "DIVERGENTE"
@@ -186,7 +187,7 @@ if arquivo_razao is not None:
                         if not df_a_status.empty:
                             df_apb_final = pd.merge(df_a, df_a_status, on="_id_apb_", how="left").drop(columns=["_id_apb_"])
                             df_apb_final["status"] = df_apb_final["status"].fillna("DIVERGENTE")
-                            df_apb_final["explicacao"] = df_apb_final["explicacao"].fillna("Divergente: Título não validado pela IA.")
+                            df_apb_final["explicacao"] = df_apb_final["explicacao"].fillna("Divergente: Título não validado após checagem quádrupla.")
                         else:
                             df_apb_final = df_apb.copy()
                             df_apb_final["status"] = "DIVERGENTE"
@@ -199,13 +200,13 @@ if arquivo_razao is not None:
                         if not df_p_status.empty:
                             df_pend_final = pd.merge(df_p, df_p_status, on="_id_pend_", how="left").drop(columns=["_id_pend_"])
                             df_pend_final["status"] = df_pend_final["status"].fillna("DIVERGENTE")
-                            df_pend_final["explicacao"] = df_pend_final["explicacao"].fillna("Divergente: Título não validado pela IA.")
+                            df_pend_final["explicacao"] = df_pend_final["explicacao"].fillna("Divergente: Título não validado após checagem quádrupla.")
                         else:
                             df_pend_final = df_pendencias.copy()
                             df_pend_final["status"] = "DIVERGENTE"
                             df_pend_final["explicacao"] = "Não processado"
 
-                    st.success("🎉 Conciliação rigorosa por número de título concluída com sucesso!")
+                    st.success("🎉 Conciliação com checagem quádrupla concluída com sucesso!")
                     
                     st.session_state["df_razao_final"] = df_razao_final
                     st.session_state["df_apb_final"] = df_apb_final
@@ -315,7 +316,7 @@ if arquivo_razao is not None:
                         
                         contexto_chat = st.session_state["df_razao_final"].to_json(orient="records", force_ascii=False)
                         resposta_chat = client.chat.completions.create(
-                            model=os.getenv("MODELO_OPENAI", "gpt-4o"),
+                            model=os.getenv("MODELO_OPENAI"),
                             messages=[
                                 {"role": "system", "content": f"Você é um auditor financeiro amigável. Responda às dúvidas do usuário com base nestes dados de conciliação: {contexto_chat}"},
                                 {"role": "user", "content": pergunta_usuario}
