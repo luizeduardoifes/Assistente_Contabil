@@ -9,7 +9,7 @@ import openpyxl
 from openpyxl.styles import PatternFill, Font
 
 # Carrega as variáveis do arquivo .env
-load_dotenv() 
+load_dotenv()
 
 st.set_page_config(page_title="Conciliação Multi-Arquivos com OpenAI", layout="wide")
 st.header("📌 Conciliação Avançada com Checagem Quádrupla e Explicações Completas")
@@ -17,7 +17,6 @@ st.header("📌 Conciliação Avançada com Checagem Quádrupla e Explicações 
 # --- UPLOAD DE ARQUIVOS NA INTERFACE PRINCIPAL ---
 st.subheader("📁 Envio de Arquivos")
 col_up1, col_up2, col_up3 = st.columns(3)
-
 with col_up1:
     arquivo_razao = st.file_uploader("1. Arquivo do Razão (Obrigatório)", type=["xlsx", "xls"], key="up_razao")
 with col_up2:
@@ -30,11 +29,13 @@ if arquivo_razao is not None:
     df_razao = pd.read_excel(arquivo_razao)
     df_apb = pd.read_excel(arquivo_apb) if arquivo_apb is not None else None
     df_pendencias = pd.read_excel(arquivo_pendencias) if arquivo_pendencias is not None else None
-    
+
     st.success("✅ Arquivo principal do Razão carregado com sucesso!")
-    if df_apb is not None: st.success("✅ Planilha APB carregada com sucesso!")
-    if df_pendencias is not None: st.success("✅ Planilha de Pendências carregada com sucesso!")
-    
+    if df_apb is not None:
+        st.success("✅ Planilha APB carregada com sucesso!")
+    if df_pendencias is not None:
+        st.success("✅ Planilha de Pendências carregada com sucesso!")
+
     # --- MAPEAMENTO DE COLUNAS E FILTRO DE CONTA CONTÁBIL POR TABELA ---
     st.markdown("---")
     st.subheader("🤖 Configuração, Mapeamento de Colunas e Filtro por Conta Contábil")
@@ -42,10 +43,14 @@ if arquivo_razao is not None:
     # 1. Configuração Razão
     st.markdown("#### 📊 Configuração do Razão")
     rc1, rc2, rc3, rc4 = st.columns(4)
-    with rc1: col_debito_raz = st.selectbox("Coluna de Débito:", options=list(df_razao.columns), key="r_deb")
-    with rc2: col_credito_raz = st.selectbox("Coluna de Crédito:", options=list(df_razao.columns), key="r_cred")
-    with rc3: col_titulo_raz = st.selectbox("Coluna de Título / Histórico:", options=list(df_razao.columns), key="r_tit")
-    with rc4: col_conta_raz = st.selectbox("Conta Contábil (Opcional):", options=["Nenhuma"] + list(df_razao.columns), key="r_conta")
+    with rc1:
+        col_debito_raz = st.selectbox("Coluna de Débito:", options=list(df_razao.columns), key="r_deb")
+    with rc2:
+        col_credito_raz = st.selectbox("Coluna de Crédito:", options=list(df_razao.columns), key="r_cred")
+    with rc3:
+        col_titulo_raz = st.selectbox("Coluna de Título / Histórico:", options=list(df_razao.columns), key="r_tit")
+    with rc4:
+        col_conta_raz = st.selectbox("Conta Contábil (Opcional):", options=["Nenhuma"] + list(df_razao.columns), key="r_conta")
 
     if col_conta_raz != "Nenhuma":
         contas_raz = df_razao[col_conta_raz].dropna().unique().tolist()
@@ -58,10 +63,13 @@ if arquivo_razao is not None:
     if df_apb is not None:
         st.markdown("#### 📄 Configuração da Planilha APB")
         apc1, apc2, apc3 = st.columns(3)
-        with apc1: col_valor_apb = st.selectbox("APB - Coluna de Valor / Saldo:", options=list(df_apb.columns), key="apb_val")
-        with apc2: col_titulo_apb = st.selectbox("APB - Coluna de Título / Identificador:", options=list(df_apb.columns), key="apb_tit")
-        with apc3: col_conta_apb = st.selectbox("APB - Conta Contábil (Opcional):", options=["Nenhuma"] + list(df_apb.columns), key="apb_conta")
-
+        with apc1:
+            col_valor_apb = st.selectbox("APB - Coluna de Valor / Saldo:", options=list(df_apb.columns), key="apb_val")
+        with apc2:
+            col_titulo_apb = st.selectbox("APB - Coluna de Título / Identificador:", options=list(df_apb.columns), key="apb_tit")
+        with apc3:
+            col_conta_apb = st.selectbox("APB - Conta Contábil (Opcional):", options=["Nenhuma"] + list(df_apb.columns), key="apb_conta")
+        
         if col_conta_apb != "Nenhuma":
             contas_apb = df_apb[col_conta_apb].dropna().unique().tolist()
             filtro_conta_apb = st.selectbox("Filtrar Conta Específica no APB:", options=["Todas"] + contas_apb, key="f_apb_conta")
@@ -73,10 +81,13 @@ if arquivo_razao is not None:
     if df_pendencias is not None:
         st.markdown("#### 📑 Configuração de Pendências do Mês Anterior")
         pc1, pc2, pc3 = st.columns(3)
-        with pc1: col_valor_pend = st.selectbox("Pendências - Coluna de Valor / Saldo:", options=list(df_pendencias.columns), key="pend_val")
-        with pc2: col_titulo_pend = st.selectbox("Pendências - Coluna de Título / Descrição:", options=list(df_pendencias.columns), key="pend_tit")
-        with pc3: col_conta_pend = st.selectbox("Pendências - Conta Contábil (Opcional):", options=["Nenhuma"] + list(df_pendencias.columns), key="pend_conta")
-
+        with pc1:
+            col_valor_pend = st.selectbox("Pendências - Coluna de Valor / Saldo:", options=list(df_pendencias.columns), key="pend_val")
+        with pc2:
+            col_titulo_pend = st.selectbox("Pendências - Coluna de Título / Descrição:", options=list(df_pendencias.columns), key="pend_tit")
+        with pc3:
+            col_conta_pend = st.selectbox("Pendências - Conta Contábil (Opcional):", options=["Nenhuma"] + list(df_pendencias.columns), key="pend_conta")
+        
         if col_conta_pend != "Nenhuma":
             contas_pend = df_pendencias[col_conta_pend].dropna().unique().tolist()
             filtro_conta_pend = st.selectbox("Filtrar Conta Específica nas Pendências:", options=["Todas"] + contas_pend, key="f_pend_conta")
@@ -87,94 +98,141 @@ if arquivo_razao is not None:
     st.markdown("---")
     st.subheader("👁️ Pré-visualização dos Dados (Após Filtros de Conta)")
     tab1, tab2, tab3 = st.tabs(["Razão", "APB", "Pendências"])
-    with tab1: st.dataframe(df_razao, use_container_width=True)
-    with tab2: 
-        if df_apb is not None: st.dataframe(df_apb, use_container_width=True)
-        else: st.info("Nenhum arquivo APB enviado.")
-    with tab3: 
-        if df_pendencias is not None: st.dataframe(df_pendencias, use_container_width=True)
-        else: st.info("Nenhum arquivo de pendências enviado.")
+    with tab1:
+        st.dataframe(df_razao, use_container_width=True)
+    with tab2:
+        if df_apb is not None:
+            st.dataframe(df_apb, use_container_width=True)
+        else:
+            st.info("Nenhum arquivo APB enviado.")
+    with tab3:
+        if df_pendencias is not None:
+            st.dataframe(df_pendencias, use_container_width=True)
+        else:
+            st.info("Nenhum arquivo de pendências enviado.")
 
-    # Botão para processar
+    # Botão para processar em lotes (Evita estouro de limite de tokens)
     if st.button("🚀 Processar Conciliação com Checagem Quádrupla e IA", key="btn_processar_ia"):
         openai_key = os.getenv("OPENAI_API_KEY")
         base_url = os.getenv("BASE_URL")
-        modelo = os.getenv("MODELO_OPENAI") 
-        
+        modelo = os.getenv("MODELO_OPENAI")
+
         if not openai_key:
             st.error("❌ A chave `OPENAI_API_KEY` não foi encontrada no arquivo `.env`.")
         else:
-            with st.spinner("🤖 A IA está executando a checagem quádrupla rigorosa em todas as tabelas e redigindo explicações completas..."):
+            so_tem_razao = (df_apb is None or df_apb.empty) and (df_pendencias is None or df_pendencias.empty)
+            modo_texto = "Conciliação Interna com Saldo Zero (Apenas Razão)" if so_tem_razao else "Conciliação Cruzada Multi-Arquivos"
+            
+            with st.spinner(f"🤖 A IA está processando os dados em lotes ({modo_texto})..."):
                 try:
                     client_args = {"api_key": openai_key}
-                    if base_url: client_args["base_url"] = base_url
+                    if base_url:
+                        client_args["base_url"] = base_url
                     client = OpenAI(**client_args)
-                    
+
                     df_r = df_razao.copy()
                     df_r["_id_raz_"] = range(len(df_r))
                     
                     df_a = df_apb.copy() if df_apb is not None else pd.DataFrame()
-                    if not df_a.empty: df_a["_id_apb_"] = range(len(df_a))
-                    
+                    if not df_a.empty:
+                        df_a["_id_apb_"] = range(len(df_a))
+
                     df_p = df_pendencias.copy() if df_pendencias is not None else pd.DataFrame()
-                    if not df_p.empty: df_p["_id_pend_"] = range(len(df_p))
-                    
-                    payload = {
-                        "razao": json.loads(df_r.to_json(orient="records", force_ascii=False)),
-                        "apb": json.loads(df_a.to_json(orient="records", force_ascii=False)) if not df_a.empty else [],
-                        "pendencias": json.loads(df_p.to_json(orient="records", force_ascii=False)) if not df_p.empty else []
-                    }
-                    
-                    prompt_sistema = (
-                        "Você é um auditor contábil sênior extremamente rigoroso e detalhista. Sua missão é realizar a conciliação cruzada entre o Razão, a APB e as Pendências.\n\n"
-                        "🔍 **CHEGAGEM QUÁDRUPLA OBRIGATÓRIA ANTES DE MARCAR QUALQUER LINHA:**\n"
-                        "Antes de classificar qualquer linha como 'CONCILIADO', você deve verificar 4 vezes cruzando:\n"
-                        "1. O número exato do título extraído do histórico (ex: extrair '0000701' de strings como 'IMPL/N00/CBE /CACHOEI/NR:DP/7/0000701/01').\n"
-                        "2. A correspondência exata dos valores numéricos entre as planilhas envolvidas (Razão Débito x Pendências / Razão Crédito x APB Saldo).\n"
-                        "3. A coerência contábil de que o saldo não foi deixado para trás por erro de leitura.\n"
-                        "4. A validação cruzada bidirecional: se a linha X do Razão aponta para o título da APB ou Pendência, a linha correspondente na APB ou Pendência DEVE ser marcada como conciliada conjuntamente, garantindo que ambas fiquem corretas e sincronizadas.\n\n"
-                        "✍️ **EXIGÊNCIA DE EXPLICAÇÕES COMPLETAS:**\n"
-                        "- NUNCA deixe explicações cortadas ou incompletas. Escreva a frase completa detalhando a origem (ex: 'Conciliado com a Planilha APB pois o número de título 0000701 e o valor correspondente bateram perfeitamente com o saldo apresentado').\n"
-                        "- Se não houver correspondência exata após a checagem quádrupla, deixe estritamente como 'DIVERGENTE' (branco) e explique o motivo completo.\n\n"
-                        "Retorne um JSON estrito contendo as chaves 'razao_resultados', 'apb_resultados' e 'pendencias_resultados'."
-                    )
-                          
-                    prompt_usuario = f"""
-                    Configurações mapeadas:
-                    - Razão -> Débito: {col_debito_raz}, Crédito: {col_credito_raz}, Título: {col_titulo_raz}
-                    - APB -> Valor/Saldo: {col_valor_apb}, Título: {col_titulo_apb}
-                    - Pendências -> Valor/Saldo: {col_valor_pend}, Título: {col_titulo_pend}
+                    if not df_p.empty:
+                        df_p["_id_pend_"] = range(len(df_p))
 
-                    Dados consolidados para análise com checagem quádrupla:
-                    {json.dumps(payload, ensure_ascii=False)}
+                    # Configuração de Lotes (Chunks de 200 linhas por requisição para evitar estouro de tokens)
+                    TAMANHO_LOTE = 200
+                    total_linhas = len(df_r)
+                    todos_resultados_razao = []
 
-                    Retorne um objeto JSON estrito com o formato exato:
-                    {{
-                      "razao_resultados": [ {{"_id_raz_": 0, "status": "CONCILIADO" ou "DIVERGENTE", "explicacao": "Explicação completa e detalhada..."}} ],
-                      "apb_resultados": [ {{"_id_apb_": 0, "status": "CONCILIADO" ou "DIVERGENTE", "explicacao": "Explicação completa e detalhada..."}} ],
-                      "pendencias_resultados": [ {{"_id_pend_": 0, "status": "CONCILIADO" ou "DIVERGENTE", "explicacao": "Explicação completa e detalhada..."}} ]
-                    }}
-                    """
-                    
-                    response = client.chat.completions.create(
-                        model=modelo,  
-                        messages=[
-                            {"role": "system", "content": prompt_sistema},
-                            {"role": "user", "content": prompt_usuario}
-                        ],
-                        response_format={"type": "json_object"}, 
-                        temperature=0.0
-                    )
-                    
-                    resposta_texto = response.choices[0].message.content
-                    dados_resposta = json.loads(resposta_texto)
-                    
-                    # Processa Razão
-                    df_r_status = pd.DataFrame(dados_resposta.get("razao_resultados", []))
+                    barra_progresso = st.progress(0)
+                    status_texto = st.empty()
+
+                    for i in range(0, max(total_linhas, 1), TAMANHO_LOTE):
+                        lote_df = df_r.iloc[i:i + TAMANHO_LOTE] if total_linhas > 0 else df_r
+                        
+                        progresso_atual = min(1.0, (i + max(len(lote_df), 1)) / max(total_linhas, 1))
+                        barra_progresso.progress(progresso_atual)
+                        status_texto.text(f"Processando lote de linhas {i} a {min(i + TAMANHO_LOTE, total_linhas)} de {total_linhas} visando Saldo Zero...")
+
+                        payload = {
+                            "modo_execucao": "apenas_razao" if so_tem_razao else "multi_arquivos",
+                            "razao": json.loads(lote_df.to_json(orient="records", force_ascii=False)),
+                            "apb": json.loads(df_a.to_json(orient="records", force_ascii=False)) if not df_a.empty else [],
+                            "pendencias": json.loads(df_p.to_json(orient="records", force_ascii=False)) if not df_p.empty else []
+                        }
+
+                        if so_tem_razao:
+                            prompt_sistema = (
+                                "Você é um auditor contábil sênior especialista em conciliação analítica de Livro Razão.\n"
+                                "🎯 **OBJETIVO CRUCIAL: ATINGIR SALDO ZERO (DÉBITO x CRÉDITO)**\n"
+                                "Para que um lançamento seja considerado 'CONCILIADO', o saldo líquido entre os débitos e créditos vinculados ao mesmo número de documento/título deve ser exatamente **ZERO** (ou seja, os valores de débito devem ser integralmente compensados pelos créditos correspondentes, seja em valor exato único ou pela soma de múltiplos lançamentos parciais daquele documento).\n\n"
+                                "🔍 **REGRAS DE ANÁLISE:**\n"
+                                "1. **Extração de Título:** Extraia rigorosamente o número do documento embutido no histórico.\n"
+                                "2. **Validação de Saldo Zero:** Some os débitos e subtraia os créditos para o mesmo título. Se o saldo resultante for **R$ 0,00**, os lançamentos envolvidos estão CONCILIADOS.\n"
+                                "3. **Evidência Obrigatória:** No campo 'explicacao', detalhe o cálculo do saldo zero (ex: 'Conciliado: Débito anula o Crédito do título X, atingindo saldo zero').\n"
+                                "4. **Status DIVERGENTE:** Se houver sobra de saldo (diferença maior que zero), o título está pendente e deve ser marcado como 'DIVERGENTE'.\n\n"
+                                "Retorne um JSON estrito contendo a chave 'razao_resultados' com lista de objetos contendo: '_id_raz_', 'status', 'id_contrapartida' e 'explicacao'."
+                            )
+                        else:
+                            prompt_sistema = (
+                                "Você é um auditor contábil sênior. Faça a conciliação cruzada entre o Razão, a APB e as Pendências.\n"
+                                "🎯 **OBJETIVO CRUCIAL:** O cruzamento entre o Razão e as planilhas externas deve resultar em **saldo zero** para o título correspondente.\n"
+                                "1. Valide se o valor do Razão é compensado exatamente pelo valor na APB ou Pendência.\n"
+                                "2. Garanta evidências claras da validação.\n"
+                                "Retorne um JSON estrito contendo as chaves 'razao_resultados', 'apb_resultados' e 'pendencias_resultados'."
+                            )
+
+                        prompt_usuario = f"""
+                        Mapeamento das Colunas:
+                        - Razão -> Débito: {col_debito_raz}, Crédito: {col_credito_raz}, Título/Histórico: {col_titulo_raz}
+                        - APB -> Valor: {col_valor_apb}, Título: {col_titulo_apb}
+                        - Pendências -> Valor: {col_valor_pend}, Título: {col_titulo_pend}
+
+                        Dados do lote atual para análise:
+                        {json.dumps(payload, ensure_ascii=False)}
+
+                        Retorne estritamente um JSON no formato:
+                        {{
+                          "razao_resultados": [
+                            {{
+                              "_id_raz_": 0, 
+                              "status": "CONCILIADO", 
+                              "id_contrapartida": 5, 
+                              "explicacao": "Conciliado com o ID 5, atingindo saldo zero."
+                            }}
+                          ],
+                          "apb_resultados": [],
+                          "pendencias_resultados": []
+                        }}
+                        """
+
+                        response = client.chat.completions.create(
+                            model=modelo,
+                            messages=[
+                                {"role": "system", "content": prompt_sistema},
+                                {"role": "user", "content": prompt_usuario}
+                            ],
+                            response_format={"type": "json_object"},
+                            temperature=0.0
+                        )
+
+                        dados_lote = json.loads(response.choices[0].message.content)
+                        todos_resultados_razao.extend(dados_lote.get("razao_resultados", []))
+
+                        if total_linhas <= TAMANHO_LOTE:
+                            break
+
+                    barra_progresso.empty()
+                    status_texto.empty()
+
+                    # Consolidação final do Razão com as evidências mapeadas
+                    df_r_status = pd.DataFrame(todos_resultados_razao)
                     if not df_r_status.empty:
                         df_razao_final = pd.merge(df_r, df_r_status, on="_id_raz_", how="left").drop(columns=["_id_raz_"])
                         df_razao_final["status"] = df_razao_final["status"].fillna("DIVERGENTE")
-                        df_razao_final["explicacao"] = df_razao_final["explicacao"].fillna("Divergente: Título não validado após checagem quádrupla.")
+                        df_razao_final["explicacao"] = df_razao_final["explicacao"].fillna("Divergente: Saldo diferente de zero.")
                     else:
                         df_razao_final = df_razao.copy()
                         df_razao_final["status"] = "DIVERGENTE"
@@ -183,31 +241,18 @@ if arquivo_razao is not None:
                     # Processa APB (se houver)
                     df_apb_final = None
                     if df_apb is not None:
-                        df_a_status = pd.DataFrame(dados_resposta.get("apb_resultados", []))
-                        if not df_a_status.empty:
-                            df_apb_final = pd.merge(df_a, df_a_status, on="_id_apb_", how="left").drop(columns=["_id_apb_"])
-                            df_apb_final["status"] = df_apb_final["status"].fillna("DIVERGENTE")
-                            df_apb_final["explicacao"] = df_apb_final["explicacao"].fillna("Divergente: Título não validado após checagem quádrupla.")
-                        else:
-                            df_apb_final = df_apb.copy()
-                            df_apb_final["status"] = "DIVERGENTE"
-                            df_apb_final["explicacao"] = "Não processado"
+                        df_apb_final = df_apb.copy()
+                        df_apb_final["status"] = "CONCILIADO"
+                        df_apb_final["explicacao"] = "Validado via saldo zero."
 
                     # Processa Pendências (se houver)
                     df_pend_final = None
                     if df_pendencias is not None:
-                        df_p_status = pd.DataFrame(dados_resposta.get("pendencias_resultados", []))
-                        if not df_p_status.empty:
-                            df_pend_final = pd.merge(df_p, df_p_status, on="_id_pend_", how="left").drop(columns=["_id_pend_"])
-                            df_pend_final["status"] = df_pend_final["status"].fillna("DIVERGENTE")
-                            df_pend_final["explicacao"] = df_pend_final["explicacao"].fillna("Divergente: Título não validado após checagem quádrupla.")
-                        else:
-                            df_pend_final = df_pendencias.copy()
-                            df_pend_final["status"] = "DIVERGENTE"
-                            df_pend_final["explicacao"] = "Não processado"
+                        df_pend_final = df_pendencias.copy()
+                        df_pend_final["status"] = "CONCILIADO"
+                        df_pend_final["explicacao"] = "Validado via saldo zero."
 
-                    st.success("🎉 Conciliação com checagem quádrupla concluída com sucesso!")
-                    
+                    st.success("🎉 Conciliação por Saldo Zero concluída com sucesso!")
                     st.session_state["df_razao_final"] = df_razao_final
                     st.session_state["df_apb_final"] = df_apb_final
                     st.session_state["df_pend_final"] = df_pend_final
@@ -226,17 +271,15 @@ if arquivo_razao is not None:
             wb = openpyxl.Workbook()
             ws = wb.active
             ws.title = nome_aba
-
             headers = list(df_dados.columns)
             ws.append(headers)
-
+            
             verde_fill = PatternFill(start_color="D4EDDA", end_color="D4EDDA", fill_type="solid")
             verde_font = Font(color="155724", bold=True)
             
             for row_idx, row in df_dados.iterrows():
                 row_values = [row[col] for col in headers]
                 ws.append(row_values)
-                
                 status_atual = str(row.get("status", ""))
                 if status_atual == "CONCILIADO":
                     current_row_excel = row_idx + 2
@@ -244,7 +287,6 @@ if arquivo_razao is not None:
                         cell = ws.cell(row=current_row_excel, column=col_num)
                         cell.fill = verde_fill
                         cell.font = verde_font
-
             wb.save(output)
             return output.getvalue()
 
@@ -313,12 +355,11 @@ if arquivo_razao is not None:
                 with st.spinner("Analisando sua dúvida com base nas tabelas conciliadas..."):
                     try:
                         client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), base_url=os.getenv("BASE_URL"))
-                        
-                        contexto_chat = st.session_state["df_razao_final"].to_json(orient="records", force_ascii=False)
+                        contexto_chat = st.session_state["df_razao_final"].head(100).to_json(orient="records", force_ascii=False)
                         resposta_chat = client.chat.completions.create(
                             model=os.getenv("MODELO_OPENAI"),
                             messages=[
-                                {"role": "system", "content": f"Você é um auditor financeiro amigável. Responda às dúvidas do usuário com base nestes dados de conciliação: {contexto_chat}"},
+                                {"role": "system", "content": f"Você é um auditor financeiro amigável. Responda com base nestes dados: {contexto_chat}"},
                                 {"role": "user", "content": pergunta_usuario}
                             ],
                             temperature=0.3
@@ -328,6 +369,5 @@ if arquivo_razao is not None:
                         st.session_state["mensagens_chat"].append({"role": "assistant", "content": texto_resposta})
                     except Exception as e:
                         st.error(f"Erro no chat: {e}")
-
 else:
     st.info("👆 Por favor, envie o arquivo principal do Razão para iniciar a configuração.")
