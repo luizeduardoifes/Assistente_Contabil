@@ -1,5 +1,5 @@
 streamlit
 pandas
-openpyxl
-python-dotenv
 openai
+python-dotenv
+openpyxl
